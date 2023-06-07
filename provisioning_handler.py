@@ -18,7 +18,15 @@ import json
 import os
 import asyncio
 import glob
+import uuid
+import socket
+import fcntl
+import struct
 
+def get_mac(interface):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', interface[:15].encode('utf-8')))
+    return ''.join(['%02x:' % char for char in info[18:24]])[:-1]
 
 class ProvisioningHandler:
 
@@ -46,7 +54,7 @@ class ProvisioningHandler:
         # Sample Provisioning Template requests a serial number as a 
         # seed to generate Thing names in IoTCore. Simulating here.
         #self.unique_id = str(int(round(time.time() * 1000)))
-        self.unique_id = "1234567-abcde-fghij-klmno-1234567abc-TLS350" 
+        self.unique_id = get_mac("wlan0")
 
         # ------------------------------------------------------------------------------
         #  -- PROVISIONING HOOKS EXAMPLE --
